@@ -1,4 +1,5 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE FlexibleContexts #-}
 module Log
   ( Log (Log)
   , Event (LogStrLn, LogStr, Indent, Unindent)

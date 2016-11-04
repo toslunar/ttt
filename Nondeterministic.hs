@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleInstances, DeriveFunctor, MultiParamTypeClasses #-}
 -- for "instance MonadWriter w (NondetWriter w)"
 module Nondeterministic
   (
@@ -21,7 +21,7 @@ class (Monad m) => MonadNondet m where
 data NondetWriter w a =
     Leaf w a
   | Node w [NondetWriter w a]
-  deriving Show
+  deriving (Show, Functor)
 
 
 instance (Monoid w) => Monad (NondetWriter w) where
@@ -31,6 +31,10 @@ instance (Monoid w) => Monad (NondetWriter w) where
     Leaf v b -> Leaf (w <> v) b
     Node v b -> Node (w <> v) b
   (Node w trees) >>= f = Node w $ map (>>= f) trees
+
+instance (Monoid w) => Applicative (NondetWriter w) where
+  pure = return
+  (<*>) = ap
 
 instance (Monoid w) => MonadNondet (NondetWriter w) where
   chooseNondet = Node mempty
