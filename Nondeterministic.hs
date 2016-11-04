@@ -23,9 +23,16 @@ data NondetWriter w a =
   | Node w [NondetWriter w a]
   deriving Show
 
+instance Functor (NondetWriter w) where
+  fmap f (Leaf w a) = Leaf w (f a)
+  fmap f (Node w trees) = Node w (map (fmap f) trees)
+
+instance (Monoid w) => Applicative (NondetWriter w) where
+  pure a = Leaf mempty a
+  (<*>) = undefined
 
 instance (Monoid w) => Monad (NondetWriter w) where
-  return a = Leaf mempty a
+  return = pure
 
   (Leaf w a) >>= f = case f a of
     Leaf v b -> Leaf (w <> v) b

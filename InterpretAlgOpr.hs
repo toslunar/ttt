@@ -60,5 +60,5 @@ commentAlgOpr :: (MonadWriter Log m) =>
   String -> TdGoI m (Maybe x) -> TdGoI m (Maybe x)
 commentAlgOpr str t = Td $ \ a -> do
   x0 <- get
-  when (isNothing x0) $ tell $ Log [LogStr str]
+  when (isNothing x0) $ tell $ Log [LogStrLn $ "*** algebraic operation *** : " ++  str]
   getTd t a

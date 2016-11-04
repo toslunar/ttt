@@ -18,6 +18,7 @@ import Control.Monad.State.Class
 -- import qualified Data.Map as M
 
 
+-- exist x . TdGoI m x
 type ExistTdGoI m =
   forall r . (forall x . (Pointed x, Eq x, MyShow x) => TdGoI m x -> r) -> r
 
@@ -25,7 +26,7 @@ type LocationExpr = String
 
 data LambdaExpr =
   -- symbol
-    Const Nat
+    ConstN Nat
   | Sum VarName VarName
   -- lambda
   | Variable VarName
@@ -40,7 +41,7 @@ data LambdaExpr =
   deriving (Show)
 
 instance MyShow LambdaExpr where
-  myShowsPrec d (Const n) = shows n
+  myShowsPrec d (ConstN n) = shows n
   myShowsPrec d (Sum varX varY) = showParen (d > 6) $
     showString varX .
     showString "+" .
@@ -85,7 +86,7 @@ exist0 f = \ k -> k f
 
 {-
 interpretPure :: (Monad m) => LambdaExpr -> ExistTdGoI m
-interpretPure (Const n) = \ k -> k $ constGoI n
+interpretPure (ConstN n) = \ k -> k $ constGoI n
 interpretPure (Sum varX varY) = \ k -> k $ sumGoI varX varY
 interpretPure (Variable varX) = \ k -> k $ variableGoI varX
 interpretPure (Apply l1 l2) = \ k ->
@@ -95,7 +96,7 @@ interpretPure (Abst varX l) = \ k ->
   interpretPure l $ \ a -> k $ abstGoI varX a
 
 interpretNondet :: (MonadNondet m) => LambdaExpr -> ExistTdGoI m
-interpretNondet (Const n) = \ k -> k $ constGoI n
+interpretNondet (ConstN n) = \ k -> k $ constGoI n
 interpretNondet (Sum varX varY) = \ k -> k $ sumGoI varX varY
 interpretNondet (Variable varX) = \ k -> k $ variableGoI varX
 interpretNondet (Apply l1 l2) = \ k ->
@@ -113,8 +114,8 @@ interpretPure ::
 interpretPure = go myShow  where
   go :: (MonadWriter Log m) =>
     (LambdaExpr -> String) -> LambdaExpr -> ExistTdGoI m
-  go sh (Const n) = \ k ->
-    k $ constGoI (sh . Hole $ Const n) n
+  go sh (ConstN n) = \ k ->
+    k $ constGoI (sh . Hole $ ConstN n) n
   go sh (Sum varX varY) = \ k ->
     k $ sumGoI (sh . Hole $ Sum varX varY) varX varY
   go sh (Variable varX) = \ k ->
@@ -132,8 +133,8 @@ interpretNondet ::
 interpretNondet = go myShow  where
   go :: (MonadNondet m, MonadWriter Log m) =>
     (LambdaExpr -> String) -> LambdaExpr -> ExistTdGoI m
-  go sh (Const n) = \ k ->
-    k $ constGoI (sh . Hole $ Const n) n
+  go sh (ConstN n) = \ k ->
+    k $ constGoI (sh . Hole $ ConstN n) n
   go sh (Sum varX varY) = \ k ->
     k $ sumGoI (sh . Hole $ Sum varX varY) varX varY
   go sh (Variable varX) = \ k ->
@@ -155,8 +156,8 @@ interpretState :: (MonadState Memory m, MonadWriter Log m) =>
 interpretState = go myShow  where
   go :: (MonadState Memory m, MonadWriter Log m) =>
     (LambdaExpr -> String) -> LambdaExpr -> ExistTdGoI m
-  go sh (Const n) = \ k ->
-    k $ constGoI (sh . Hole $ Const n) n
+  go sh (ConstN n) = \ k ->
+    k $ constGoI (sh . Hole $ ConstN n) n
   go sh (Sum varX varY) = \ k ->
     k $ sumGoI (sh . Hole $ Sum varX varY) varX varY
   go sh (Variable varX) = \ k ->
